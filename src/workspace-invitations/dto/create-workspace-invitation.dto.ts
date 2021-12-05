@@ -1,1 +1,3 @@
-export class CreateWorkspaceInvitationDto {}
+export class CreateWorkspaceInvitationDto {
+  username: string
+}

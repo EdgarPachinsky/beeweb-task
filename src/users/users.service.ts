@@ -53,8 +53,7 @@ export class UsersService {
     return this.UserModel.remove({_id:id})
   }
 
-  async findMyWorkspace(id: string) {
-    const user = await this.UserModel.findOne({_id:id})
+  async findMyWorkspace(user: User) {
     return await this.WorkspaceModel.find({ belongsTo: user }).exec();
   }
 }

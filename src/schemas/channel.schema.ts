@@ -14,11 +14,17 @@ export class Channel {
   @Prop()
   description: string;
 
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
+  belongsTo: User;
+
   @Prop({type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]})
   users: User[];
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Workspace' })
   workspace: Workspace
+
+  @Prop()
+  image: string;
 }
 
 export const ChannelSchema = SchemaFactory.createForClass(Channel);

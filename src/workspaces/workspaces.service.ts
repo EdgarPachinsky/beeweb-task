@@ -4,10 +4,16 @@ import { InjectModel } from '@nestjs/mongoose';
 import { CreateWorkspaceDto } from './dto/create-workspace.dto';
 import { UpdateWorkspaceDto } from './dto/update-workspace.dto';
 import { Workspace, WorkspaceDocument } from '../schemas/workspace.schema';
+import { User } from '../schemas/user.schema';
+import { ChannelsService } from '../channels/channels.service';
+import { Channel, ChannelDocument } from '../schemas/channel.schema';
 
 @Injectable()
 export class WorkspacesService {
-  constructor(@InjectModel(Workspace.name) private WorkspaceModel: Model<WorkspaceDocument>) {
+  constructor(
+    @InjectModel(Workspace.name) private WorkspaceModel: Model<WorkspaceDocument>,
+    @InjectModel(Channel.name) private ChannelModel: Model<ChannelDocument>
+  ) {
   }
 
   async create(createWorkspaceDto: CreateWorkspaceDto) {
@@ -47,11 +53,11 @@ export class WorkspacesService {
     }
   }
 
-  async findOne(subdomain: string) {
+  async findOne(subdomain: string, user: any) {
 
     try {
 
-      const workspace = await this.WorkspaceModel.findOne({ subdomain: subdomain }).populate('belongsTo coWorkers');
+      const workspace = await this.WorkspaceModel.findOne({ subdomain: subdomain, belongsTo:user }).populate('belongsTo coWorkers');
 
       return {
         status:'success',
@@ -65,6 +71,12 @@ export class WorkspacesService {
         data: {}
       };
     }
+  }
+
+  async findChannels(id: string, user: any){
+
+    const workspace = await this.WorkspaceModel.findOne({_id:id})
+    return this.ChannelModel.find({workspace:workspace})
   }
 
   async update(id: string, updateWorkspaceDto: UpdateWorkspaceDto) {
@@ -87,9 +99,16 @@ export class WorkspacesService {
     }
   }
 
-  async remove(id: string) {
+  async remove(id: string, user: any) {
 
     try {
+      const deletingWorkspace = await this.WorkspaceModel.findOne({ _id: id })
+      if(!deletingWorkspace.belongsTo === user._id){
+        return {
+          status:'error',
+          message: 'Not your workspace',
+        };
+      }
 
       const workspace = await this.WorkspaceModel.remove({ _id: id });
 

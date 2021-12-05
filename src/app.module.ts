@@ -8,6 +8,7 @@ import { ChannelsModule } from './channels/channels.module';
 import { WorkspaceInvitationsModule } from './workspace-invitations/workspace-invitations.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { AuthModule } from './auth/auth.module';
+import { FilesModule } from './files/files.module';
 
 
 @Global()
@@ -22,6 +23,7 @@ import { AuthModule } from './auth/auth.module';
     ChannelsModule,
     WorkspaceInvitationsModule,
     AuthModule,
+    FilesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

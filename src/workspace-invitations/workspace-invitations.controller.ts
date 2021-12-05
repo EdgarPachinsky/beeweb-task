@@ -1,20 +1,25 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Request, UseGuards } from '@nestjs/common';
 import { WorkspaceInvitationsService } from './workspace-invitations.service';
 import { CreateWorkspaceInvitationDto } from './dto/create-workspace-invitation.dto';
 import { UpdateWorkspaceInvitationDto } from './dto/update-workspace-invitation.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('workspace-invitations')
 export class WorkspaceInvitationsController {
   constructor(private readonly workspaceInvitationsService: WorkspaceInvitationsService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() createWorkspaceInvitationDto: CreateWorkspaceInvitationDto) {
-    return this.workspaceInvitationsService.create(createWorkspaceInvitationDto);
+  create(@Request() req) {
+    return this.workspaceInvitationsService.create(req.body, req.user);
   }
 
-  @Get()
-  findAll() {
-    return this.workspaceInvitationsService.findAll();
+  @UseGuards(JwtAuthGuard)
+  @Post('user-invitations')
+  findUserInvitations(
+    @Request() req
+  ) {
+    return this.workspaceInvitationsService.findUserInvitations(req.user);
   }
 
   @Get(':id')

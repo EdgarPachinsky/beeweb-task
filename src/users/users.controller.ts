@@ -18,6 +18,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { FileUpload } from '../utils/file-upload'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { log } from 'util';
 
 const fileUploadUtils = new FileUpload();
 const saltOrRounds = 10;
@@ -32,7 +33,7 @@ export class UsersController {
   @Post('register')
   @UseInterceptors(FileInterceptor('avatar', fileUploadUtils.getLocalOptions()))
   async register(@Body() createUserDto: CreateUserDto, @UploadedFile() file: Express.Multer.File) {
-    createUserDto.avatar = file.filename
+    createUserDto.avatar = file?.filename
     createUserDto.password = await bcrypt.hash(createUserDto.password, saltOrRounds);
 
     return await this.usersService.create(createUserDto);
@@ -50,13 +51,14 @@ export class UsersController {
   }
 
   @Patch(':id')
-  @UseInterceptors(FileInterceptor('file', fileUploadUtils.getLocalOptions()))
+  @UseInterceptors(FileInterceptor('avatar', fileUploadUtils.getLocalOptions()))
   update(
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
     @UploadedFile() file: Express.Multer.File
   ) {
-    file?updateUserDto.avatar = file.filename:""
+
+    updateUserDto.avatar = file?.filename
     return this.usersService.update(id, updateUserDto);
   }
 
@@ -65,8 +67,9 @@ export class UsersController {
     return this.usersService.remove(id);
   }
 
-  @Get('workspace/:id')
-  getMyWorkspace(@Param('id') id: string) {
-    return this.usersService.findMyWorkspace(id);
+  @UseGuards(JwtAuthGuard)
+  @Get('workspaces/get')
+  getMyWorkspace(@Request() req) {
+    return this.usersService.findMyWorkspace(req.user);
   }
 }
